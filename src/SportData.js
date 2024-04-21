@@ -81,9 +81,9 @@ async function todayMatches() {
       ? match.teams[0].img
       : `https:${match.teams[0].img}`;
 
-    const imageName1 = `images/teams/${match.teams[0].name}-65.png`;
+    const imageName1 = `serve/content/images/teams/${match.teams[0].name}-65.png`;
     const imageUrl2 = `https:${match.teams[1].img}`;
-    const imageName2 = `images/teams/${match.teams[1].name}-65.png`;
+    const imageName2 = `serve/content/images/teams/${match.teams[1].name}-65.png`;
     let state1 = true;
     let state2 = true;
 
