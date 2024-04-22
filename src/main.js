@@ -61,7 +61,7 @@ async function saveFoodData() {
 async function saveHomeData() {
   console.log("::HOME DATA::");
 
-  const data = await calculateHomeData(2, 1000);
+  const data = await calculateHomeData(5, 5000);
   const HomeModule = require("./db/Home.model");
 
   for (const d of data) {
