@@ -18,12 +18,12 @@ async function calculateWithGrothRate(dataFetcher, cnt = 10, sleepMs = 1000) {
         : 0,
     }));
     data = newData;
-    sleep(sleepMs);
+    await sleep(sleepMs);
   }
 
   data = data.map((d) => ({
     ...d,
-    growthRate: d.growthRate / Math.min(1, cnt - 1),
+    growthRate: d.growthRate / Math.max(1, cnt - 1),
   }));
 
   return data;
