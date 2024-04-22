@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 const axios = require("axios");
 const fs = require("fs");
+const util = require("util");
 
 const { sleep, calculateWithGrothRate } = require("./utils");
 const SportTodayModel = require("./db/SportToday.model");
@@ -30,17 +31,11 @@ async function fetchKooraHomeData() {
         });
       });
       const midEl = element?.querySelector(".liveDet");
-      const midElCh = midEl?.children[0];
-      let info = {
-        text: midEl?.textContent,
-        line1: midElCh?.firstChild?.textContent,
-        line2: midElCh?.lastChild?.textContent,
-      };
 
       return {
         textContent: element?.textContent,
         teams,
-        info,
+        info: midEl?.innerText,
         element: element,
         timestamp: Date.now(),
       };
@@ -54,6 +49,7 @@ async function fetchKooraHomeData() {
 
 async function downloadImage(url, filename) {
   try {
+    if (!url) return;
     const response = await axios.get(url, { responseType: "arraybuffer" });
     console.log(`download ${filename}...`);
 
@@ -77,12 +73,14 @@ async function todayMatches() {
   for (let i = 0; i < today.length; i++) {
     const match = today[i];
 
-    const imageUrl1 = match.teams[0].img.startsWith("https")
-      ? match.teams[0].img
-      : `https:${match.teams[0].img}`;
+    const imageUrl1 = match.teams[0].img.startsWith("//")
+      ? `https:${match.teams[0].img}`
+      : match.teams[0].img;
+    const imageUrl2 = match?.teams[1]?.img?.startsWith("//")
+      ? `https:${match.teams[1].img}`
+      : match.teams[1].img;
 
     const imageName1 = `serve/content/images/teams/${match.teams[0].name}-65.png`;
-    const imageUrl2 = `https:${match.teams[1].img}`;
     const imageName2 = `serve/content/images/teams/${match.teams[1].name}-65.png`;
     let state1 = true;
     let state2 = true;
@@ -110,15 +108,12 @@ async function saveSportData() {
   await SportTodayModel.deleteMany();
   console.log("delete all old matches");
   for (let i = 0; i < today.length; i++) {
-    const match = new SportTodayModel({
+    const mData = {
       teams: today[i].teams,
-      info: {
-        line1: today[i].info.line1,
-        line2: today[i].info.line2,
-      },
+      info: today[i].info,
       timestamp: today[i].timestamp,
-    });
-
+    };
+    const match = new SportTodayModel(mData);
     await match.save();
     console.log(`Match ${today[i].textContent} saved succuffully.`);
   }

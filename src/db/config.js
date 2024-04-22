@@ -18,4 +18,10 @@ const connect = async () => {
   }
 };
 
-module.exports = connector = { connect, connection: mongoose.connection };
+const disconnect = async () => await mongoose.disconnect();
+
+module.exports = connector = {
+  connect,
+  disconnect,
+  connection: mongoose.connection,
+};

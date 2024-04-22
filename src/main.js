@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { connect } = require("./db/config");
+const { connect, disconnect } = require("./db/config");
 const { calculateHomeData } = require("./HomeData");
 const { fetchFoodData } = require("./FoodData");
 const FoodModel = require("./db/Food.model");
@@ -33,6 +33,8 @@ const util = require("util");
     console.error(er);
     console.error("Script has error!");
     process.exit(-1);
+  } finally {
+    disconnect();
   }
 })();
 
