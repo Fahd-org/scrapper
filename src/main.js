@@ -14,18 +14,20 @@ const util = require("util");
 (async function main() {
   try {
     // connect to database
+    console.log("start sport!");
+    await saveSportData();
+
     console.log("start connecting to db will take some seconds ......");
     await connect();
-    // await saveFoodData();
-    // await saveEnergyData();
 
-    // await saveHomeData();
+    console.log("start food!");
+    await saveFoodData();
 
-    // const kooraData = await todayMatches();
-    // console.log(util.inspect(kooraData, { depth: null, colors: true }));
+    console.log("start energy!");
+    await saveEnergyData();
 
-    await saveSportData();
-    // console.log();
+    console.log("start Home!");
+    await saveHomeData();
 
     console.log("Script finishe Succefully !!");
     process.exit(0);
