@@ -14,11 +14,12 @@ const util = require("util");
 (async function main() {
   try {
     // connect to database
-    console.log("start sport!");
-    await saveSportData();
 
     console.log("start connecting to db will take some seconds ......");
     await connect();
+
+    console.log("start sport!");
+    await saveSportData();
 
     console.log("start food!");
     await saveFoodData();
