@@ -46,6 +46,12 @@ async function saveFoodData() {
 
   for (const d of data) {
     if (d.length < 5) continue;
+    const found = await FoodModel.findOne({ country: d[1] });
+    if (found) {
+      console.log(`Skip ${d[1]}`);
+      continue;
+    }
+
     const food = new FoodModel({
       rank: Number(d[0]),
       country: d[1],
