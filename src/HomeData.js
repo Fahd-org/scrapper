@@ -3,7 +3,9 @@ const { sleep, calculateWithGrothRate } = require("./utils");
 const WORLD_METTER_URL = "https://www.worldometers.info/";
 
 async function fetchHomeData() {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const page = await browser.newPage();
   await page.goto(WORLD_METTER_URL, { waitUntil: "networkidle2" });
 

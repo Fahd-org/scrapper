@@ -8,7 +8,9 @@ const SportTodayModel = require("./db/SportToday.model");
 const KOORA_DOT_COM_URL = "https://www.kooora.com/";
 
 async function fetchKooraHomeData() {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const page = await browser.newPage();
   console.log("Start ...");
   await page.goto(KOORA_DOT_COM_URL, {
