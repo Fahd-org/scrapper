@@ -20,8 +20,8 @@ const util = require("util");
     console.log("start connecting to db will take some seconds ......");
     await connect();
 
-    console.log("start sport!");
-    await saveSportData();
+    // console.log("start sport!");
+    // await saveSportData();
 
     console.log("start food!");
     await saveFoodData();
@@ -76,13 +76,13 @@ async function saveHomeData() {
     const old = await HomeModule.findOne().byRel(d.rel);
 
     if (old) {
-      const growthRate =
-        ((d.value - old.value) / (d.timestamp - old.timestamp) +
-          old.growthRate +
-          d.growthRate) /
-        3;
+      // const growthRate =
+      //   (Math.abs((d.value - old.value) / (d.timestamp - old.timestamp)) +
+      //     old.growthRate +
+      //     d.growthRate) /
+      //   3;
 
-      old.growthRate = growthRate;
+      old.growthRate = d.growthRate;
       old.value = d.value;
       old.timestamp = d.timestamp;
       await old.save();

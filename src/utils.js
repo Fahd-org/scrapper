@@ -10,11 +10,11 @@ async function calculateWithGrothRate(dataFetcher, cnt = 10, sleepMs = 1000) {
   for (let i = 0; i < cnt; i++) {
     console.log(`fetching Home data(${i + 1}/${cnt})...`);
     let newData = await dataFetcher();
-    newData = newData.map((d, i) => ({
+    newData = newData.map((d, idx) => ({
       ...d,
       growthRate: data
-        ? ((data[i].growthRate ?? 0) + d.value - data[i].value) /
-          (d.timestamp - data[i].timestamp)
+        ? (data[idx].growthRate ?? 0) +
+          (d.value - data[idx].value) / (d.timestamp - data[idx].timestamp)
         : 0,
     }));
     data = newData;
