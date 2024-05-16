@@ -5,8 +5,17 @@
 const mongoose = require("mongoose");
 
 const scheme = new mongoose.Schema({
-  teams: [{ name: String, img: String }],
-  info: String,
+  week: String,
+  time: String,
+  status: String,
+  teams: {
+    a: { name: String, image: String },
+    b: { name: String, image: String },
+  },
+  score: {
+    a: String,
+    b: String,
+  },
   timestamp: Number,
 });
 

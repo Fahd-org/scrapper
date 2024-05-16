@@ -5,7 +5,8 @@ const util = require("util");
 
 const { sleep, calculateWithGrothRate } = require("./utils");
 const SportTodayModel = require("./db/SportToday.model");
-const KOORA_DOT_COM_URL = "https://www.kooora.com/";
+const KOORA_DOT_COM_URL = "https://clw.kooora.com/";
+const YALLA_KOORA_DOT_COM_URL = "https://www.yallakora.com/match-center/";
 
 async function fetchKooraHomeData() {
   const browser = await puppeteer.launch({
@@ -67,23 +68,85 @@ async function downloadImage(url, filename) {
   }
 }
 
+async function fetchYallaKora() {
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+  const page = await browser.newPage();
+  console.log("Start ...");
+  await page.goto(YALLA_KOORA_DOT_COM_URL, {
+    timeout: 60000,
+    waitUntil: "domcontentloaded",
+  });
+  console.log("Page Loaded ...");
+
+  await page.waitForSelector(".allData", { timeout: 60000 });
+  console.log("got it");
+
+  const currentMatches = await page.evaluate(() => {
+    return [...document.querySelectorAll(".allData")].map((element) => {
+      const week = element?.querySelector(".date")?.textContent ?? "";
+      const time = element?.querySelector(".time")?.textContent ?? "00:00";
+      const status =
+        element?.querySelector(".matchStatus span")?.textContent ?? "لم تبدأ";
+      const teamA = {
+        name: element?.querySelector(".teamA p")?.textContent ?? "",
+        image: element?.querySelector(".teamA img")?.getAttribute("src") ?? "",
+      };
+      const teamB = {
+        name: element?.querySelector(".teamB p")?.textContent ?? "",
+        image: element?.querySelector(".teamB img")?.getAttribute("src") ?? "",
+      };
+
+      const score = {
+        a:
+          element?.querySelector(".MResult .score:nth-child(1)")?.textContent ??
+          "-",
+        b:
+          element?.querySelector(".MResult .score:nth-child(3)")?.textContent ??
+          "-",
+      };
+
+      return {
+        week,
+        time,
+        status,
+        teams: {
+          a: teamA,
+          b: teamB,
+        },
+        score: {
+          a: score.a,
+          b: score.b,
+        },
+        timestamp: Date.now(),
+      };
+    });
+  });
+  console.log("Element Loaded Loaded ...");
+
+  await browser.close();
+  return { today: currentMatches };
+}
+
 async function todayMatches() {
-  const { today } = await fetchKooraHomeData();
+  const { today } = await fetchYallaKora();
 
   console.log("start proccess image");
 
   for (let i = 0; i < today.length; i++) {
     const match = today[i];
 
-    const imageUrl1 = match.teams[0].img.startsWith("//")
-      ? `https:${match.teams[0].img}`
-      : match.teams[0].img;
-    const imageUrl2 = match?.teams[1]?.img?.startsWith("//")
-      ? `https:${match.teams[1].img}`
-      : match.teams[1].img;
+    const imageUrl1 = match.teams.a.image.startsWith("//")
+      ? `https:${match.teams.a.image}`
+      : match.teams.a.image;
 
-    const imageName1 = `serve/content/images/teams/${match.teams[0].name}-65.png`;
-    const imageName2 = `serve/content/images/teams/${match.teams[1].name}-65.png`;
+    const imageUrl2 = match?.teams.b.image?.img?.startsWith("//")
+      ? `https:${match.teams.b.image}`
+      : match.teams.b.image;
+
+    const imageName1 = `serve/content/images/teams/${match.teams.a.name}-65.png`;
+    const imageName2 = `serve/content/images/teams/${match.teams.b.name}-65.png`;
     let state1 = true;
     let state2 = true;
 
@@ -98,8 +161,8 @@ async function todayMatches() {
       await sleep(5000);
     }
 
-    if (state1) today[i].teams[0].img = imageName1;
-    if (state2) today[i].teams[1].img = imageName2;
+    if (state1) today[i].teams.a.image = imageName1;
+    if (state2) today[i].teams.b.image = imageName2;
   }
 
   return today;
@@ -110,14 +173,11 @@ async function saveSportData() {
   await SportTodayModel.deleteMany();
   console.log("delete all old matches");
   for (let i = 0; i < today.length; i++) {
-    const mData = {
-      teams: today[i].teams,
-      info: today[i].info,
-      timestamp: today[i].timestamp,
-    };
-    const match = new SportTodayModel(mData);
+    const match = new SportTodayModel(today[i]);
     await match.save();
-    console.log(`Match ${today[i].textContent} saved succuffully.`);
+    console.log(
+      `Match ${today[i].teams.a.name}-${today[i].teams.b.name} saved succuffully.`
+    );
   }
 }
 

@@ -17,11 +17,12 @@ const util = require("util");
     console.log(
       `###################start at ${new Date()}####################`
     );
+
     console.log("start connecting to db will take some seconds ......");
     await connect();
 
-    // console.log("start sport!");
-    // await saveSportData();
+    console.log("start sport!");
+    await saveSportData();
 
     console.log("start food!");
     await saveFoodData();
